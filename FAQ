@@ -1,0 +1,56 @@
+======================================================
+ Frequently Asked Questions About the Weather Utility
+======================================================
+
+:Copyright: (c) 2006-2012 Jeremy Stanley <fungi@yuggoth.org>. Permission
+            to use, copy, modify, and distribute this software is
+            granted under terms provided in the LICENSE file distributed
+            with this software.
+
+.. contents::
+
+1. Can I help?
+--------------
+Sure! Bug reports and feature suggestions are always welcome, but fixes
+and patches are of course preferred. Contact fungi@yuggoth.org if
+desired, but please read this FAQ and the included manuals for
+weather(1) and weatherrc(5) before asking questions that might be
+answered therein.
+
+2. How do I figure out my local METAR station ID?
+-------------------------------------------------
+The list of stations included in the "stations" file is comprised of
+thousands of entries, so if you're within the USA it's recommended to
+use weather's built-in Census place name and ZCTA (postal ZIP code)
+searching capabilities. Otherwise, using its latitude,longitude
+coordinate search feature is probably your best bet. See the weather(1)
+manual for examples.
+
+3. How do I figure out my local city name and state abbreviation?
+-----------------------------------------------------------------
+As of the 2.0 release, this is no longer necessary. In Spring of 2011
+the NWS switched away from city-named forecast zone IDs to the numeric
+state zone IDs also used for alerts. As a result, weather now comes with
+pregenerated correlations between airports/stations and zones along with
+USA Census (FIPS and ZCTA/ZIP code) and global latitude,longitude
+coordinates and can search among them in a flexible and intuitive
+manner. See the weather(1) manual for examples.
+
+4. I live outside the USA--can this be made to work for me anyway?
+------------------------------------------------------------------
+ICAO codes for METAR stations can be found for cities and airports
+worldwide, but forecast and alert data is harder to come by. If you have
+any recommendations of plaintext data for other countries available in a
+format like NOAA's, I will be happy to start incorporating it into the
+weather utility. If the data is published in a non-English language,
+I'll require some additional input from speakers of that language for
+how to handle filtering and formatting of the text.
+
+5. Why do I get the wrong forecast when specifying -i or --id?
+--------------------------------------------------------------
+As of the 2.0 release, this question is no longer relevant.
+
+6. Where can I get a list of the NWS advisory zones for alerts?
+---------------------------------------------------------------
+As of the 2.0 release, this is no longer necessary. See FAQ entries #2
+and #3 for more detail.

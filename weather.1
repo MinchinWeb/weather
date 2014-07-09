@@ -1,0 +1,215 @@
+.TH weather 1 "2012\-06\-24" "2.0" \" -*- nroff -*-
+\" Copyright (c) 2006-2012 Jeremy Stanley <fungi@yuggoth.org>.
+\" Permission to use, copy, modify, and distribute this software is
+\" granted under terms provided in the LICENSE file distributed with
+\" this software.
+.SH NAME
+weather \- command-line tool to obtain weather conditions and forecasts
+.SH SYNOPSIS
+.B weather
+[
+.I options
+] [
+.I alias1
+|
+.I search1
+[
+.I alias2
+|
+.I search2
+[...]]]
+.SH DESCRIPTION
+.
+This command-line utility is intended to provide quick access to current
+weather conditions and forecasts.
+.
+Presently, it is capable of returning data for localities throughout the
+USA and some select locations globally by retrieving and formatting
+decoded METARs (Meteorological Aerodrome Reports) from NOAA (the USA
+National Oceanic and Atmospheric Administration) and forecasts/alerts
+from NWS (the USA National Weather Service).
+.
+The tool is written to function in the same spirit as other command-line
+informational utilities like \fIcal\fR(1), \fIcalendar\fR(1) and
+\fIdict\fR(1).
+.
+It retrieves arbitrary weather data via precompiled correlations or
+custom-tailored aliases (system-wide or on a per-user basis).
+
+Behavior can be determined by command-line options and specification of
+zero or more location aliases and search terms.
+
+Aliases are defined in \fIweatherrc\fR(5) files, as a convenient means
+of grouping URIs together using a short name.
+.
+Specifying multiple aliases or location search terms on the command line
+causes the utility to output data for each, as if it had been invoked
+multiple times.
+.
+If none are specified, then an alias of \fIdefault\fR is checked for a
+\fIdefargs\fR option and any alias names listed within it
+(comma-separated) are applied instead.
+
+Searches utilize location correlation sets in INI-style text files named
+\fIairports\fR, \fIplaces\fR, \fIstations\fR, \fIzctas\fR and
+\fIzones\fR.
+.
+A precomputed copy is distributed with the source, but can be rebuilt
+from updated data sources as needed by placing them in the current
+working directory and running with the \fI\-\-build\-sets\fR option (see
+the comments at the top of any location correlation set file for
+instructions on where to find updated data sources).
+.
+Positive search results are cached and sourced as aliases on subsequent
+runs for as long as the correlation sets remain unchanged, and are
+cleared automatically once the correlation sets are updated.
+
+Retrieved data is also cached automatically for a short period of time,
+adjustable with the \fIcacheage\fR configuration option or
+\fI\-\-cacheage\fR command-line option.
+.
+This helps throttle load against NOAA/NWS servers in case the utility is
+repeatedly re-run requesting the same data, but can be overridden with
+the \fIcache_data\fR configuration option or \fI\-\-no\-cache\-data\fR
+command-line option.
+.
+.SH OPTIONS
+A summary of options is included below.
+.TP
+.BR \-\-version
+show program's version number and exit
+.TP
+.BR \-h ", " \-\-help
+show a help message and exit
+.TP
+.BR \-a ", " \-\-alert
+include local alert notices
+.TP
+.BR \-\-atypes =\fIATYPES\fR
+list of alert notification types to display (ex:
+.BR tornado_warning,urgent_weather_message )
+.TP
+.BR \-\-build\-sets
+(re)build location correlation sets
+.TP
+.BR \-\-cacheage =\fICACHEAGE\fR
+duration in seconds to refresh cached data (ex:
+.BR 900 )
+.TP
+.BR \-\-cachedir =\fICACHEDIR\fR
+directory for storing cached searches and data (ex:
+.BR ~/.weather )
+.TP
+.BR \-f ", " \-\-forecast
+include a local forecast
+.TP
+.BR \-\-headers =\fIHEADERS\fR
+list of conditions headers to display (ex:
+.BR temperature,wind )
+.TP
+.BR \-\-imperial
+filter/convert conditions for US/UK units
+.TP
+.BR \-\-info
+output detailed information for your search
+.TP
+.BR \-l ", " \-\-list
+list all configured aliases and cached searches
+.TP
+.BR \-\-longlist
+display details of all configured aliases
+.TP
+.BR \-m ", " \-\-metric
+filter/convert conditions for metric units
+.TP
+.BR \-n ", " \-\-no\-conditions
+disable output of current conditions
+.TP
+.BR \-\-no\-cache
+disable all caching (searches and data)
+.TP
+.BR \-\-no\-cache\-data
+disable retrieved data caching
+.TP
+.BR \-\-no\-cache\-search
+disable search result caching
+.TP
+.BR \-q ", " \-\-quiet
+skip preambles and don't indent
+.TP
+.BR \-\-setpath =\fISETPATH\fR
+directory search path for correlation sets (ex:
+.BR .:~/.weather )
+.TP
+.BR \-v ", " \-\-verbose
+show full decoded feeds
+.SH EXAMPLES
+.TP
+.B weather
+View output for the default alias, if one has been defined (otherwise
+display usage/syntax similar to \-\-help)
+.TP
+.BR weather " " rdu
+Display weather conditions at the airport with IATA/FAA code \fIRDU\fR.
+.TP
+.BR weather " " \-\-info " " raleigh
+Show a list of FIPS codes for United States Census Bureau places
+containing the word \fIraleigh\fR (or the proximity information if only
+one match was found).
+.TP
+.BR weather " " \(dq ^ral[ie]{2}gh " " city.*nc$ \(dq
+Get the current weather conditions from the nearest station to the
+Census place name matching the regular expression provided.
+.TP
+.BR weather " " \-fv " " fips3755000
+Get the full decoded METAR from the nearest station, and the forecast
+data for the nearest zone to the Census place with FIPS code
+\fI3755000\fR with no special filtering or formatting.
+.TP
+.BR weather " " \-\-forecast " " \-\-no\-cache\-data " " 27613
+Ignore any recent cached METAR or forecast data and display fresh output
+for the nearest station and zone to the Census ZCTA (essentially USPS
+ZIP code) \fI27613\fR.
+.TP
+.BR weather " " home " " work
+Show current conditions for both the \fIhome\fR and \fIwork\fR aliases
+in that order.
+.TP
+.BR weather " " 35.878573,\-78.727813
+.TP
+.BR weather " " 35\-52\-43n,78\-43\-40w
+.TP
+.BR weather " " \(dq 35\-52n, " " 78\-43w \(dq
+Display weather conditions for the nearest station to an arbitrary set
+of global coordinates in latitude,longitude order either in decimal
+format or degree, degree\-minute or degree\-minute\-second formats,
+optionally using signed or cardinal hemisphere designations with or
+without spacing.
+.
+Note that the cut-off for maximum acceptable distance is hard-coded at
+0.1 radians (roughly 637km or 396mi).
+.
+.SH INPUT FILES
+.
+.B weather
+may additionally obtain configuration data from a system-wide
+configuration file, a per-user configuration file, and a local
+directory configuration file.
+.
+The file format and configuration options are described in
+.IR weatherrc (5).
+.
+They are aggregated in the following order:
+.TP
+.I /etc/weatherrc " or " /etc/weather/weatherrc
+the system-wide configuration
+.TP
+.IR ~/.weather/weatherrc " or " ~/.weatherrc
+the per-user configuration
+.TP
+.I ./weatherrc
+the local directory configuration
+.SH AUTHOR
+Utility and manual written by Jeremy Stanley <fungi@yuggoth.org>.
+.SH SEE ALSO
+.IR weatherrc (5)
