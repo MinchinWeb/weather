@@ -2130,3 +2130,116 @@ def correlate():
             print("   %s zones within one km of another"%zones_overlapping)
     else: print("no issues found.")
     print("Indexing complete!")
+	
+	
+## weather (no extention) file, originally a wrapper for this file
+# Copyright (c) 2006-2012 Jeremy Stanley <fungi@yuggoth.org>. Permission to
+# use, copy, modify, and distribute this software is granted under terms
+# provided in the LICENSE file distributed with this software.
+
+"""Wrapper utility using the weather.py module."""
+
+if __name__ == '__main__':
+	# added so distributors can consistently specify a private module location
+	private_module_path = None
+	if private_module_path:
+		import sys
+		sys.path.insert(1, private_module_path)
+
+	# initialize options and configs
+	selections = Selections()
+
+	# this mode just lists the aliases defined in the config
+	if selections.get_bool("list"):
+		print( list_aliases(selections.config) )
+
+	# this mode lists details of aliases defined in the config
+	elif selections.get_bool("longlist"):
+		print( list_aliases(selections.config, detail=True) )
+
+	# this mode builds the correlation data files
+	elif selections.get_bool("build_sets"):
+		correlate()
+
+	# if no arguments were provided
+	elif not selections.arguments:
+		import sys
+
+		# substitute defaults if we have any
+		if selections.config.has_option("default", "defargs"):
+			sys.argv += selections.config.get("default", "defargs").split(",")
+			selections = Selections()
+
+		# otherwise be helpful
+		else:
+			sys.argv += ("--help",)
+			selections = Selections()
+
+	# these modes analyze correlations
+	if selections.get_bool("info"):
+		guess(
+			selections.arguments[0],
+			path=selections.get("setpath"),
+			info=selections.get_bool("info"),
+			cache_search=(
+				selections.get_bool("cache") \
+					and selections.get_bool("cache_search")
+			),
+			cacheage=selections.getint("cacheage"),
+			cachedir=selections.get("cachedir")
+		)
+
+	# normal operation
+	else:
+		output = ""
+		for argument in selections.arguments:
+			if selections.get_bool("conditions", argument) or not (
+				selections.get_bool("alert", argument) \
+					or selections.get_bool("forecast", argument)
+				):
+				partial = get_metar(
+					uri=selections.get("metar", argument),
+					verbose=selections.get_bool("verbose", argument),
+					quiet=selections.get_bool("quiet", argument),
+					headers=selections.get("headers", argument),
+					imperial=selections.get_bool("imperial", argument),
+					metric=selections.get_bool("metric", argument),
+					cache_data=(
+						selections.get_bool("cache") \
+							and selections.get_bool("cache_data")
+					),
+					cacheage=selections.getint("cacheage"),
+					cachedir=selections.get("cachedir")
+				)
+				if partial: output += partial + "\n"
+			if selections.get_bool("forecast", argument) \
+				or selections.get_bool("alert", argument):
+				alert_text = ""
+				if selections.get_bool("alert", argument):
+					atypes = selections.get("atypes", argument).split(",")
+				else:
+					atypes = []
+				if selections.get_bool("forecast", argument):
+					atypes = ["zone_forecast"] + atypes
+				for atype in atypes:
+					partial = get_alert(
+						uri=selections.get(atype, argument),
+						verbose=selections.get_bool("verbose", argument),
+						quiet=selections.get_bool("quiet", argument),
+						cache_data=(
+							selections.get_bool("cache") \
+								and selections.get_bool("cache_data")
+						),
+						cacheage=selections.getint("cacheage"),
+						cachedir=selections.get("cachedir")
+					)
+					if partial:
+						alert_text += "***** %s *****\n%s\n" % (
+							atype.replace("_", " ").title(),
+							partial
+						)
+				if not alert_text:
+					alert_text = "(no current alerts for this zone)\n"
+				output += alert_text
+		output = output.strip()
+		if output: print( output )
