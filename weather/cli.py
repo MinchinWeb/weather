@@ -6,6 +6,8 @@ weather_copyright = """\
 # provided in the LICENSE file distributed with this software.
 #"""
 
+import os
+
 weather_version = "2.0"
 
 radian_to_km = 6372.795484
@@ -696,7 +698,8 @@ def data_index(path):
 
 def guess(
     expression,
-    path=".",
+    #path=".",
+	path, _ = os.path.split(os.path.abspath(__file__)),
     max_results=20,
     info=False,
     cache_search=False,
@@ -2139,7 +2142,7 @@ def correlate():
 
 """Wrapper utility using the weather.py module."""
 
-if __name__ == '__main__':
+def run():
 	# added so distributors can consistently specify a private module location
 	private_module_path = None
 	if private_module_path:
@@ -2243,3 +2246,7 @@ if __name__ == '__main__':
 				output += alert_text
 		output = output.strip()
 		if output: print( output )
+		
+		
+if __name__ == '__main__':
+	run()
